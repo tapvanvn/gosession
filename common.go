@@ -79,8 +79,8 @@ func GetKeyStepSalt(chunkID int, step int) string {
 }
 
 func GetKeyAccessPoint(accessPoint string) string {
-
-	return fmt.Sprintf("%s_%s", KeyAccessPoint, accessPoint)
+	daySecond := time.Now().Unix() % 86400
+	return fmt.Sprintf("%s_%d_%s", KeyAccessPoint, daySecond, accessPoint)
 }
 
 func GetKeyTotalQuota(sessionID int64) string {
