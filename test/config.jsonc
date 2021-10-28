@@ -1,0 +1,10 @@
+{
+    "MemDB":{
+        "ConnectionString":"192.168.1.9:6379"
+    },
+    "DocumentDB":{
+        "Provider":"mongodb",
+        "ConnectionString":"mongodb:/\/192.168.1.106:27017",
+        "DatabaseName": "test"
+    }
+}
