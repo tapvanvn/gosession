@@ -35,7 +35,7 @@ func (pro *ProviderQuota) IssueSessionString(agent interface{}) (string, error) 
 		if err != nil {
 			return "", ErrInvalidContext
 		}
-		if current < pro.Quota {
+		if current > pro.Quota {
 
 			return "", ErrHitEndpointQuota
 		}
