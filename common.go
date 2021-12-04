@@ -137,5 +137,5 @@ func CurrentChunkID() int {
 }
 
 type IProvider interface {
-	IssueSessionString(agent interface{}) (string, error)
+	IssueSessionString(endpoint string, agent string) (string, error)
 }
