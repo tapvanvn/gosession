@@ -58,7 +58,7 @@ func (val *Validator) getInfo(sessionString string) (*SessionInfo, error) {
 
 }
 
-func (val *Validator) validateSession(sessionInfo *SessionInfo) error {
+func (val *Validator) validateSession(sessionInfo *SessionInfo, agent string) error {
 
 	code, err := getSVSessionCode(sessionInfo.ChunkID)
 	if err != nil {
@@ -74,7 +74,7 @@ func (val *Validator) validateSession(sessionInfo *SessionInfo) error {
 	if err != nil {
 		return err
 	}
-	h256.Write([]byte(fmt.Sprintf("%s.%s", codeParts[0], hash)))
+	h256.Write([]byte(fmt.Sprintf("%s.%s.%s", codeParts[0], hash, agent)))
 	hmd5 := md5.New()
 	hmd5.Write(h256.Sum(nil))
 
@@ -86,24 +86,24 @@ func (val *Validator) validateSession(sessionInfo *SessionInfo) error {
 	return nil
 }
 
-func (val *Validator) Validate(sessionString string) error {
+func (val *Validator) Validate(sessionString string, agent string) error {
 
 	sessionInfo, err := val.getInfo(sessionString)
 	if err != nil {
 
 		return ErrInvalidSession
 	}
-	return val.validateSession(sessionInfo)
+	return val.validateSession(sessionInfo, agent)
 }
 
-func (val *Validator) ValidateAction(sessionString string, action int) error {
+func (val *Validator) ValidateAction(sessionString string, agent string, action int) error {
 
 	sessionInfo, err := val.getInfo(sessionString)
 	if err != nil {
 		return ErrInvalidSession
 	}
 
-	if err := val.validateSession(sessionInfo); err != nil {
+	if err := val.validateSession(sessionInfo, agent); err != nil {
 		return ErrInvalidSession
 	}
 	if val.TotalQuota > 0 {

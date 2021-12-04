@@ -84,7 +84,7 @@ func processAction() {
 		sessionString := <-ChnSession
 		action := rand.Intn(5)
 		fmt.Println(sessionString, action)
-		err := Validator.ValidateAction(sessionString, action)
+		err := Validator.ValidateAction(sessionString, "testAgent", action)
 		if err == nil {
 			PrepareSession <- sessionString
 		} else {
@@ -113,7 +113,7 @@ func autoGen() {
 
 		//fmt.Println(sessionString)
 
-		if err := Validator.Validate(sessionString); err != nil {
+		if err := Validator.Validate(sessionString, "testAgent"); err != nil {
 
 			log.Fatal(err)
 		}

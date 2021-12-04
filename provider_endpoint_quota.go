@@ -20,14 +20,7 @@ type ProviderQuota struct {
 	Quota int64
 }
 
-func (pro *ProviderQuota) IssueSessionString(agent interface{}) (string, error) {
-
-	accessPoint, ok := agent.(string)
-
-	if !ok {
-
-		return "", ErrInvalidContext
-	}
+func (pro *ProviderQuota) IssueSessionString(accessPoint string, agent string) (string, error) {
 
 	if pro.Quota > 0 {
 
@@ -60,7 +53,7 @@ func (pro *ProviderQuota) IssueSessionString(agent interface{}) (string, error) 
 
 		return "", err
 	}
-	h256.Write([]byte(fmt.Sprintf("%s.%s", parts[0], hash)))
+	h256.Write([]byte(fmt.Sprintf("%s.%s.%s", parts[0], hash, agent)))
 	hmd5 := md5.New()
 	hmd5.Write(h256.Sum(nil))
 
