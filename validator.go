@@ -131,7 +131,7 @@ func (val *Validator) validateSessionRotate(sessionInfo *SessionInfo, agent stri
 
 	setRotateCode(sessionInfo.SessionID, action, rotateCodeA, time.Second*60)
 
-	return hashString, rotateCodeB, nil
+	return fmt.Sprintf("%d.%d.%s", sessionInfo.ChunkID, sessionInfo.SessionID, hashString), rotateCodeB, nil
 }
 
 func (val *Validator) Validate(sessionString string, agent string) error {
