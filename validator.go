@@ -90,24 +90,24 @@ func (val *Validator) validateSession(sessionInfo *SessionInfo, agent string) er
 	return nil
 }
 
-func (val *Validator) validateSessionRotate(sessionInfo *SessionInfo, agent string, action int, rotateCode string) (string, error) {
+func (val *Validator) validateSessionRotate(sessionInfo *SessionInfo, agent string, action int, rotateCode string) (string, string, error) {
 
 	code, err := getSVSessionCode(sessionInfo.ChunkID)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	rotateCodeA, err := getRotateCode(sessionInfo.SessionID, action)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	if len(code) < 64 {
-		return "", ErrInvalidSession
+		return "", "", ErrInvalidSession
 	}
 	codeParts := strings.Split(code, ".")
 	h256 := sha256.New()
 	hash, err := HashStep(codeParts[1], sessionInfo.ChunkID, sessionInfo.SessionID)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	h256.Write([]byte(fmt.Sprintf("%s%s.%s.%s.%s", rotateCodeA, rotateCode, codeParts[0], hash, agent)))
 	hmd5 := md5.New()
@@ -117,15 +117,21 @@ func (val *Validator) validateSessionRotate(sessionInfo *SessionInfo, agent stri
 
 	if hashString != sessionInfo.Hash {
 
-		return "", ErrInvalidSession
+		return "", "", ErrInvalidSession
 	}
 
 	rotateCodeA = goutil.GenSecretKey(5)
 	rotateCodeB := goutil.GenSecretKey(5)
 
+	h256.Write([]byte(fmt.Sprintf("%s%s.%s.%s.%s", rotateCodeA, rotateCodeB, codeParts[0], hash, agent)))
+	hmd5 = md5.New()
+	hmd5.Write(h256.Sum(nil))
+
+	hashString = hex.EncodeToString(hmd5.Sum(nil))
+
 	setRotateCode(sessionInfo.SessionID, action, rotateCodeA, time.Second*60)
 
-	return rotateCodeB, nil
+	return hashString, rotateCodeB, nil
 }
 
 func (val *Validator) Validate(sessionString string, agent string) error {
@@ -138,12 +144,12 @@ func (val *Validator) Validate(sessionString string, agent string) error {
 	return val.validateSession(sessionInfo, agent)
 }
 
-func (val *Validator) ValidateRotate(sessionString string, agent string, rotateCode string) (string, error) {
+func (val *Validator) ValidateRotate(sessionString string, agent string, rotateCode string) (string, string, error) {
 
 	sessionInfo, err := val.getInfo(sessionString)
 	if err != nil {
 
-		return "", ErrInvalidSession
+		return "", "", ErrInvalidSession
 	}
 	return val.validateSessionRotate(sessionInfo, agent, 0, rotateCode)
 }
@@ -185,23 +191,23 @@ func (val *Validator) ValidateAction(sessionString string, agent string, action 
 	return nil
 }
 
-func (val *Validator) ValidateRotateAction(sessionString string, agent string, action int, rotateCode string) (string, error) {
+func (val *Validator) ValidateRotateAction(sessionString string, agent string, action int, rotateCode string) (string, string, error) {
 
 	sessionInfo, err := val.getInfo(sessionString)
 	if err != nil {
 		//fmt.Println("cannot get sessionInfo")
-		return "", ErrInvalidSession
+		return "", "", ErrInvalidSession
 	}
 
-	newRotateCode, err := val.validateSessionRotate(sessionInfo, agent, action, rotateCode)
+	newSessionString, newRotateCode, err := val.validateSessionRotate(sessionInfo, agent, action, rotateCode)
 	if err != nil {
 		//fmt.Println("err:", err.Error())
-		return "", ErrInvalidSession
+		return "", "", ErrInvalidSession
 	}
 	if val.TotalQuota > 0 {
 		if quota, err := getTotalQuota(sessionInfo.SessionID); err == nil {
 			if quota > val.TotalQuota {
-				return "", ErrHitQuota
+				return "", "", ErrHitQuota
 			}
 			incrTotalQuota(sessionInfo.SessionID)
 		}
@@ -211,7 +217,7 @@ func (val *Validator) ValidateRotateAction(sessionString string, agent string, a
 		if quota, err := getActionQuota(sessionInfo.SessionID, action); err == nil {
 			//fmt.Println("quota", sessionString, action, quota)
 			if quota > actionQuota {
-				return "", ErrHitQuota
+				return "", "", ErrHitQuota
 			}
 			if quota == 0 {
 				setActionQuota(sessionInfo.SessionID, action)
@@ -220,5 +226,5 @@ func (val *Validator) ValidateRotateAction(sessionString string, agent string, a
 			}
 		}
 	}
-	return newRotateCode, nil
+	return newSessionString, newRotateCode, nil
 }
