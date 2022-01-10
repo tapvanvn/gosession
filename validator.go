@@ -121,13 +121,23 @@ func (val *Validator) validateSessionRotate(sessionInfo *SessionInfo, agent stri
 		fmt.Println("should:", hashString, sessionInfo.Hash)
 		return "", "", ErrInvalidSession
 	}
-
+	chunkID, code := getChunkCode()
 	rotateCodeA = goutil.GenSecretKey(5)
 	rotateCodeB := goutil.GenSecretKey(5)
+	parts := strings.Split(code, ".")
+	h256 = sha256.New()
+
+	_ = getStepSalt(chunkID, GetStep(sessionInfo.SessionID))
+	hash, err = HashStep(parts[1], chunkID, sessionInfo.SessionID)
+
+	if err != nil {
+
+		return "", "", err
+	}
 
 	fmt.Println("new rotateCodeA:", rotateCodeA, "rotateCodeB", rotateCodeB)
 
-	h256.Write([]byte(fmt.Sprintf("%s%s.%s.%s.%s", rotateCodeA, rotateCodeB, codeParts[0], hash, agent)))
+	h256.Write([]byte(fmt.Sprintf("%s%s.%s.%s.%s", rotateCodeA, rotateCodeB, parts[0], hash, agent)))
 	hmd5 = md5.New()
 	hmd5.Write(h256.Sum(nil))
 
@@ -135,7 +145,7 @@ func (val *Validator) validateSessionRotate(sessionInfo *SessionInfo, agent stri
 
 	setRotateCode(sessionInfo.SessionID, action, rotateCodeA, time.Second*60)
 
-	return fmt.Sprintf("%d.%d.%s", sessionInfo.ChunkID, sessionInfo.SessionID, hashString), rotateCodeB, nil
+	return fmt.Sprintf("%d.%d.%s", chunkID, sessionInfo.SessionID, hashString), rotateCodeB, nil
 }
 
 func (val *Validator) Validate(sessionString string, agent string) error {
