@@ -105,13 +105,13 @@ func autoGen() {
 		return
 	}
 	SessionNum++
-	if sessionString, err := Provider.IssueSessionString(nil); err != nil {
+	if sessionString, err := Provider.IssueSessionString("testAgent"); err != nil {
 
 		log.Fatal(err)
 
 	} else {
 
-		//fmt.Println(sessionString)
+		fmt.Println(sessionString)
 
 		if err := Validator.Validate(sessionString, "testAgent"); err != nil {
 
@@ -168,7 +168,7 @@ func main() {
 
 	http.HandleFunc("/session", func(w http.ResponseWriter, r *http.Request) {
 
-		if sessionString, err := Provider.IssueSessionString(nil); err != nil {
+		if sessionString, err := Provider.IssueSessionString("testAgent"); err != nil {
 			w.Write([]byte(sessionString))
 			w.WriteHeader(http.StatusOK)
 		} else {

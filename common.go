@@ -18,6 +18,7 @@ const (
 	KEY_ACCESS_POINT   = "spoint"
 	KEY_TOTAL_QUOTA    = "sqtotal"
 	KEY_ACTION_QUOTA   = "sqact"
+	KEY_ROTATE_CODE    = "srcode"
 )
 
 var (
@@ -28,6 +29,7 @@ var (
 	KeyAccessPoint   = KEY_ACCESS_POINT
 	KeyTotalQuota    = KEY_TOTAL_QUOTA
 	KeyActionQuota   = KEY_ACTION_QUOTA
+	KeyRotateCode    = KEY_ROTATE_CODE
 
 	//MARK:
 	__config *Config        = nil
@@ -93,6 +95,10 @@ func GetKeyActionQuota(sessionID int64, action int) string {
 	daySecond := time.Now().Unix() % 86400
 	return fmt.Sprintf("%s_%d_%d_%d", KeyTotalQuota, daySecond, sessionID, action)
 }
+func GetKeyRotateCode(sessionID int64, action int) string {
+
+	return fmt.Sprintf("%s_%d_%d", KeyRotateCode, sessionID, action)
+}
 
 func Init(config *Config, eng *engine.Engine) error {
 
@@ -105,11 +111,13 @@ func Init(config *Config, eng *engine.Engine) error {
 		__config = config
 	}
 	if len(strings.TrimSpace(__config.KeyPrefix)) > 0 {
+
 		KeySessionID = fmt.Sprintf("%s_%s", __config.KeyPrefix, KEY_SESSION_ID)
 		KeySVSessionCode = fmt.Sprintf("%s_%s", __config.KeyPrefix, KEY_SVSESSION_CODE)
 		KeyAccessPoint = fmt.Sprintf("%s_%s", __config.KeyPrefix, KEY_ACCESS_POINT)
 		KeyTotalQuota = fmt.Sprintf("%s_%s", __config.KeyPrefix, KEY_TOTAL_QUOTA)
 		KeyActionQuota = fmt.Sprintf("%s_%s", __config.KeyPrefix, KEY_ACTION_QUOTA)
+		KeyRotateCode = fmt.Sprintf("%s_%s", __config.KeyPrefix, KEY_ROTATE_CODE)
 	}
 
 	if __config.ChunkDuration <= 0 {

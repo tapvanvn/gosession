@@ -25,7 +25,9 @@ func (pro *ProviderQuota) IssueSessionString(accessPoint string, agent string) (
 	if pro.Quota > 0 {
 
 		current, err := getEndPoint(accessPoint)
+
 		if err != nil {
+
 			return "", ErrInvalidContext
 		}
 		if current > pro.Quota {

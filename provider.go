@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/tapvanvn/goutil"
 )
@@ -26,7 +27,7 @@ func (pro *Provider) start() {
 
 }
 
-func (pro *Provider) IssueSessionString(agent interface{}) (string, error) {
+func (pro *Provider) IssueSessionString(agent string) (string, error) {
 
 	chunkID, code := getChunkCode()
 	sessionID, err := incrSessionID()
@@ -46,7 +47,7 @@ func (pro *Provider) IssueSessionString(agent interface{}) (string, error) {
 
 		return "", err
 	}
-	h256.Write([]byte(fmt.Sprintf("%s.%s", parts[0], hash)))
+	h256.Write([]byte(fmt.Sprintf("%s.%s.%s", parts[0], hash, agent)))
 	hmd5 := md5.New()
 	hmd5.Write(h256.Sum(nil))
 
@@ -55,8 +56,40 @@ func (pro *Provider) IssueSessionString(agent interface{}) (string, error) {
 	return fmt.Sprintf("%d.%d.%s", chunkID, sessionID, hashString), nil
 }
 
-//MARK: utility for provider
+func (pro *Provider) IssueRotateSessionString(agent string, action int) (string, string, error) {
 
+	chunkID, code := getChunkCode()
+	sessionID, err := incrSessionID()
+	rotateCodeA := goutil.GenSecretKey(5)
+	rotateCodeB := goutil.GenSecretKey(5)
+
+	if err != nil {
+
+		return "", "", err
+	}
+	parts := strings.Split(code, ".")
+
+	h256 := sha256.New()
+
+	_ = getStepSalt(chunkID, GetStep(sessionID))
+	hash, err := HashStep(parts[1], chunkID, sessionID)
+
+	if err != nil {
+
+		return "", "", err
+	}
+	h256.Write([]byte(fmt.Sprintf("%s%s.%s.%s.%s", rotateCodeA, rotateCodeB, parts[0], hash, agent)))
+	hmd5 := md5.New()
+	hmd5.Write(h256.Sum(nil))
+
+	hashString := hex.EncodeToString(hmd5.Sum(nil))
+
+	setRotateCode(sessionID, action, rotateCodeA, time.Second*60)
+
+	return fmt.Sprintf("%d.%d.%s", chunkID, sessionID, hashString), rotateCodeB, nil
+}
+
+//MARK: utility for provider
 func getStepSalt(chunkID int, step int) string {
 	salt, err := getSalt(chunkID, step)
 	if salt == "" || err != nil {

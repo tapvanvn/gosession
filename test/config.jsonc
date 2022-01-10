@@ -1,6 +1,6 @@
 {
     "MemDB":{
-        "ConnectionString":"192.168.1.9:6379"
+        "ConnectionString":"192.168.1.4:6379"
     },
     "DocumentDB":{
         "Provider":"mongodb",
