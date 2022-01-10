@@ -146,4 +146,5 @@ func CurrentChunkID() int {
 
 type IProvider interface {
 	IssueSessionString(endpoint string, agent string) (string, error)
+	IssueRotateSessionString(endpoint string, agent string, action int) (string, string, error)
 }

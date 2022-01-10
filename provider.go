@@ -27,7 +27,7 @@ func (pro *Provider) start() {
 
 }
 
-func (pro *Provider) IssueSessionString(agent string) (string, error) {
+func (pro *Provider) IssueSessionString(endpoint string, agent string) (string, error) {
 
 	chunkID, code := getChunkCode()
 	sessionID, err := incrSessionID()
@@ -56,7 +56,7 @@ func (pro *Provider) IssueSessionString(agent string) (string, error) {
 	return fmt.Sprintf("%d.%d.%s", chunkID, sessionID, hashString), nil
 }
 
-func (pro *Provider) IssueRotateSessionString(agent string, action int) (string, string, error) {
+func (pro *Provider) IssueRotateSessionString(endpoint string, agent string, action int) (string, string, error) {
 
 	chunkID, code := getChunkCode()
 	sessionID, err := incrSessionID()
