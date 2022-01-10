@@ -103,6 +103,7 @@ func (val *Validator) validateSessionRotate(sessionInfo *SessionInfo, agent stri
 	if err != nil {
 		return "", "", err
 	}
+	fmt.Println("rotateCodeA:", rotateCodeA, "rotateCodeB", rotateCode)
 	codeParts := strings.Split(code, ".")
 	h256 := sha256.New()
 	hash, err := HashStep(codeParts[1], sessionInfo.ChunkID, sessionInfo.SessionID)
@@ -123,6 +124,8 @@ func (val *Validator) validateSessionRotate(sessionInfo *SessionInfo, agent stri
 
 	rotateCodeA = goutil.GenSecretKey(5)
 	rotateCodeB := goutil.GenSecretKey(5)
+
+	fmt.Println("new rotateCodeA:", rotateCodeA, "rotateCodeB", rotateCodeB)
 
 	h256.Write([]byte(fmt.Sprintf("%s%s.%s.%s.%s", rotateCodeA, rotateCodeB, codeParts[0], hash, agent)))
 	hmd5 = md5.New()
