@@ -96,12 +96,12 @@ func (val *Validator) validateSessionRotate(sessionInfo *SessionInfo, agent stri
 	if err != nil {
 		return "", "", err
 	}
+	if len(code) < 64 {
+		return "", "", ErrInvalidSession
+	}
 	rotateCodeA, err := getRotateCode(sessionInfo.SessionID, action)
 	if err != nil {
 		return "", "", err
-	}
-	if len(code) < 64 {
-		return "", "", ErrInvalidSession
 	}
 	codeParts := strings.Split(code, ".")
 	h256 := sha256.New()
@@ -117,6 +117,7 @@ func (val *Validator) validateSessionRotate(sessionInfo *SessionInfo, agent stri
 
 	if hashString != sessionInfo.Hash {
 
+		fmt.Println("should:", hashString, sessionInfo.Hash)
 		return "", "", ErrInvalidSession
 	}
 
