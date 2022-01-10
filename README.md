@@ -3,7 +3,7 @@ This is an attempt to manage the session and prevent ddos attack.
 # 
 - A session_id is an int64, inscrease by 1 when issue a new session.
 - Server has a table of svcode that has expirate time. Each svcode indicate by a svcode_index. A new svcode will be generated after a time duration.
-- ```svcode_index = timestamp % 86400 / duration```.
+- ```svcode_index = timestamp % (86400 / duration)```.
 - svcode has 2 parts connected by "." ; ```svcodeA.svcodeB```
 - Server also has a table of ```step_salt``` (s). Each row correspond to a ```step_id``` and ```svcode_index```. it's mean there will be ```(86400 / duration) * num_of_step``` number of ```step_salt```(s) will be generated per day.
 - ```step_id = session_id % num_of_step```
