@@ -94,6 +94,7 @@ func (val *Validator) validateSessionRotate(sessionInfo *SessionInfo, agent stri
 
 	code, err := getSVSessionCode(sessionInfo.ChunkID)
 	if err != nil {
+		fmt.Println("validateSessionRotate err:", err.Error(), sessionInfo.ChunkID)
 		return "", "", err
 	}
 	if len(code) < 64 {
@@ -101,6 +102,7 @@ func (val *Validator) validateSessionRotate(sessionInfo *SessionInfo, agent stri
 	}
 	rotateCodeA, err := getRotateCode(sessionInfo.SessionID, action)
 	if err != nil {
+		fmt.Println("getRotateCode err:", err.Error(), sessionInfo.SessionID)
 		return "", "", err
 	}
 	fmt.Println("rotateCodeA:", rotateCodeA, "rotateCodeB", rotateCode)
@@ -108,6 +110,7 @@ func (val *Validator) validateSessionRotate(sessionInfo *SessionInfo, agent stri
 	h256 := sha256.New()
 	hash, err := HashStep(codeParts[1], sessionInfo.ChunkID, sessionInfo.SessionID)
 	if err != nil {
+		fmt.Println("HashStep err:", err.Error(), codeParts[1], sessionInfo.ChunkID, sessionInfo.SessionID)
 		return "", "", err
 	}
 	h256.Write([]byte(fmt.Sprintf("%s%s.%s.%s.%s", rotateCodeA, rotateCode, codeParts[0], hash, agent)))
@@ -129,13 +132,13 @@ func (val *Validator) validateSessionRotate(sessionInfo *SessionInfo, agent stri
 
 	_, err = getStepSalt(chunkID, GetStep(sessionInfo.SessionID))
 	if err != nil {
-
+		fmt.Println("getStepSalt err:", err.Error())
 		return "", "", err
 	}
 	hash, err = HashStep(parts[1], chunkID, sessionInfo.SessionID)
 
 	if err != nil {
-
+		fmt.Println("HashStep err:", err.Error())
 		return "", "", err
 	}
 
