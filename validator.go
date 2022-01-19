@@ -97,7 +97,7 @@ func (val *Validator) validateSessionRotate(sessionInfo *SessionInfo, agent stri
 		return "", "", err
 	}
 	if len(code) < 64 {
-		return "", "", ErrInvalidSession
+		return "", "", ErrInvalidSessionLength
 	}
 	rotateCodeA, err := getRotateCode(sessionInfo.SessionID, action)
 	if err != nil {
@@ -119,7 +119,7 @@ func (val *Validator) validateSessionRotate(sessionInfo *SessionInfo, agent stri
 	if hashString != sessionInfo.Hash {
 
 		fmt.Println("should:", hashString, sessionInfo.Hash)
-		return "", "", ErrInvalidSession
+		return "", "", ErrInvalidSessionVerifyHashFail
 	}
 	chunkID, code := getChunkCode()
 	rotateCodeA = goutil.GenSecretKey(5)
@@ -127,7 +127,11 @@ func (val *Validator) validateSessionRotate(sessionInfo *SessionInfo, agent stri
 	parts := strings.Split(code, ".")
 	h256 = sha256.New()
 
-	_ = getStepSalt(chunkID, GetStep(sessionInfo.SessionID))
+	_, err = getStepSalt(chunkID, GetStep(sessionInfo.SessionID))
+	if err != nil {
+
+		return "", "", err
+	}
 	hash, err = HashStep(parts[1], chunkID, sessionInfo.SessionID)
 
 	if err != nil {
@@ -210,13 +214,13 @@ func (val *Validator) ValidateRotateAction(sessionString string, agent string, a
 	sessionInfo, err := val.getInfo(sessionString)
 	if err != nil {
 		//fmt.Println("cannot get sessionInfo")
-		return "", "", ErrInvalidSession
+		return "", "", err
 	}
 
 	newSessionString, newRotateCode, err := val.validateSessionRotate(sessionInfo, agent, action, rotateCode)
 	if err != nil {
 		//fmt.Println("err:", err.Error())
-		return "", "", ErrInvalidSession
+		return "", "", err
 	}
 	if val.TotalQuota > 0 {
 		if quota, err := getTotalQuota(sessionInfo.SessionID); err == nil {

@@ -51,7 +51,11 @@ func (pro *ProviderQuota) IssueSessionString(accessPoint string, agent string) (
 
 	h256 := sha256.New()
 
-	_ = getStepSalt(chunkID, GetStep(sessionID))
+	_, err = getStepSalt(chunkID, GetStep(sessionID))
+	if err != nil {
+
+		return "", err
+	}
 	hash, err := HashStep(parts[1], chunkID, sessionID)
 
 	if err != nil {
@@ -97,7 +101,11 @@ func (pro *ProviderQuota) IssueRotateSessionString(accessPoint string, agent str
 
 	h256 := sha256.New()
 
-	_ = getStepSalt(chunkID, GetStep(sessionID))
+	_, err = getStepSalt(chunkID, GetStep(sessionID))
+	if err != nil {
+
+		return "", "", err
+	}
 	hash, err := HashStep(parts[1], chunkID, sessionID)
 
 	if err != nil {

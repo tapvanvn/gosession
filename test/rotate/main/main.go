@@ -7,6 +7,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"time"
 
 	engines "github.com/tapvanvn/godbengine"
 	"github.com/tapvanvn/godbengine/engine"
@@ -152,7 +153,9 @@ func main() {
 	Provider = provider
 
 	validator, err := gosession.NewValidator(TotalQuota)
+
 	if err != nil {
+
 		log.Fatal(err)
 	}
 
@@ -162,13 +165,17 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	sessionString2, code2, err := validator.ValidateRotateAction(sessionString, "agentTest", 1, code)
-	if err != nil {
-		log.Fatal(err)
+	for {
+		sessionString2, code2, err := validator.ValidateRotateAction(sessionString, "agentTest", 1, code)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("sess:", sessionString2, code2)
+		sessionString = sessionString2
+		code = code2
+
+		time.Sleep(time.Second)
 	}
-	sessionString3, code3, err := validator.ValidateRotateAction(sessionString2, "agentTest", 1, code2)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("success:", sessionString3, code3)
+
+	//fmt.Println("success:", sessionString3, code3)
 }

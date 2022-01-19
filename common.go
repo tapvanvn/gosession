@@ -37,6 +37,8 @@ var (
 )
 
 var ErrInvalidSession = errors.New("Invalid Session")
+var ErrInvalidSessionVerifyHashFail = errors.New("Invalid Session Hash Fail")
+var ErrInvalidSessionLength = errors.New("Invalid Session Length")
 var ErrInvalidConfig = errors.New("Invalid Config")
 var ErrInvalidContext = errors.New("Invalid Context")
 var ErrHitEndpointQuota = errors.New("Hit Endpoint Quota")
@@ -67,6 +69,7 @@ func HashStep(baseString string, chunkID int, sessionID int64) (string, error) {
 	hmd5.Write([]byte(salt))
 
 	hash := hex.EncodeToString(hmd5.Sum(nil))
+
 	return hash, nil
 }
 

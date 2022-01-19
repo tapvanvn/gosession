@@ -40,7 +40,11 @@ func (pro *Provider) IssueSessionString(endpoint string, agent string) (string, 
 
 	h256 := sha256.New()
 
-	_ = getStepSalt(chunkID, GetStep(sessionID))
+	_, err = getStepSalt(chunkID, GetStep(sessionID))
+	if err != nil {
+
+		return "", err
+	}
 	hash, err := HashStep(parts[1], chunkID, sessionID)
 
 	if err != nil {
@@ -71,7 +75,11 @@ func (pro *Provider) IssueRotateSessionString(endpoint string, agent string, act
 
 	h256 := sha256.New()
 
-	_ = getStepSalt(chunkID, GetStep(sessionID))
+	_, err = getStepSalt(chunkID, GetStep(sessionID))
+	if err != nil {
+
+		return "", "", err
+	}
 	hash, err := HashStep(parts[1], chunkID, sessionID)
 
 	if err != nil {
@@ -90,13 +98,18 @@ func (pro *Provider) IssueRotateSessionString(endpoint string, agent string, act
 }
 
 //MARK: utility for provider
-func getStepSalt(chunkID int, step int) string {
+func getStepSalt(chunkID int, step int) (string, error) {
 	salt, err := getSalt(chunkID, step)
 	if salt == "" || err != nil {
+
 		salt = goutil.GenSecretKey(__config.SaltLength)
-		setSalt(chunkID, step, salt)
+
+		if err := setSalt(chunkID, step, salt); err != nil {
+			return salt, err
+		}
+
 	}
-	return salt
+	return salt, nil
 }
 
 func getChunkCode() (int, string) {
