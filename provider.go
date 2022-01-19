@@ -92,7 +92,7 @@ func (pro *Provider) IssueRotateSessionString(endpoint string, agent string, act
 
 	hashString := hex.EncodeToString(hmd5.Sum(nil))
 
-	setRotateCode(sessionID, action, rotateCodeA, time.Second*60)
+	setRotateCode(sessionID, action, rotateCodeA, time.Second*180)
 
 	return fmt.Sprintf("%d.%d.%s", chunkID, sessionID, hashString), rotateCodeB, nil
 }

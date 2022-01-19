@@ -102,6 +102,7 @@ func (val *Validator) validateSessionRotate(sessionInfo *SessionInfo, agent stri
 	}
 	rotateCodeA, err := getRotateCode(sessionInfo.SessionID, action)
 	if err != nil {
+		//getRotateCode err: redis: nil 1074
 		fmt.Println("getRotateCode err:", err.Error(), sessionInfo.SessionID)
 		return "", "", err
 	}
@@ -150,7 +151,7 @@ func (val *Validator) validateSessionRotate(sessionInfo *SessionInfo, agent stri
 
 	hashString = hex.EncodeToString(hmd5.Sum(nil))
 
-	setRotateCode(sessionInfo.SessionID, action, rotateCodeA, time.Second*60)
+	setRotateCode(sessionInfo.SessionID, action, rotateCodeA, time.Second*180)
 
 	return fmt.Sprintf("%d.%d.%s", chunkID, sessionInfo.SessionID, hashString), rotateCodeB, nil
 }

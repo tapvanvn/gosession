@@ -118,7 +118,7 @@ func (pro *ProviderQuota) IssueRotateSessionString(accessPoint string, agent str
 
 	hashString := hex.EncodeToString(hmd5.Sum(nil))
 
-	setRotateCode(sessionID, action, rotateCodeA, time.Second*60)
+	setRotateCode(sessionID, action, rotateCodeA, time.Second*180)
 
 	return fmt.Sprintf("%d.%d.%s", chunkID, sessionID, hashString), rotateCodeB, nil
 }
